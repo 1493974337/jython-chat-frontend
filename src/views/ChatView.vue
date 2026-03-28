@@ -1,9 +1,9 @@
 <template>
   <div class="chat-container">
-    <!-- 标题 -->
     <header class="chat-header">
-      <h1>Jython AI助手</h1>
-      <p class="subtitle">与AI进行长对话，支持Jython编程问题解答</p>
+      <div class="chat-header-inner">
+        <h1 class="chat-title">Jython AI助手</h1>
+      </div>
     </header>
 
     <!-- 聊天区域 -->
@@ -38,8 +38,8 @@
       <!-- 输入区域 -->
       <div class="input-container">
         <div class="input-wrapper">
-          <textarea v-model="inputMessage" @keydown.enter.exact.prevent="sendMessage" placeholder="输入你的问题..."
-            rows="3" class="message-input" :disabled="loading"></textarea>
+          <textarea v-model="inputMessage" placeholder="输入你的问题..." rows="3" class="message-input"
+            :disabled="loading"></textarea>
           <div class="input-actions">
             <div class="session-info" v-if="sessionId">
               会话ID: <code>{{ sessionId }}</code>
@@ -51,24 +51,15 @@
             </button>
           </div>
         </div>
-        <div class="input-hint">
-          按 <kbd>Enter</kbd> 发送，按 <kbd>Shift+Enter</kbd> 换行
-        </div>
       </div>
     </div>
 
-    <!-- 底部信息 -->
-    <footer class="chat-footer">
-      <div class="footer-content">
-        <p>💡 提示：本AI助手专门解答Jython编程相关问题，支持长对话上下文。</p>
-        <p>🔗 后端服务：jython-helper Spring Boot + LangChain4j</p>
-      </div>
-    </footer>
+    <footer class="brand-footer">Jython AI助手</footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUpdated, nextTick } from 'vue'
+import { ref, onMounted, onUpdated, nextTick } from 'vue'
 import { useChatApi } from '../composables/useChatApi'
 
 // 消息类型定义
@@ -86,7 +77,7 @@ const loading = ref(false)
 const messagesContainer = ref<HTMLElement | null>(null)
 
 // 使用聊天API组合式函数
-const { sessionId, sendChatMessage, sendStreamingMessage, startNewSession } = useChatApi()
+const { sessionId, sendStreamingMessage, startNewSession } = useChatApi()
 
 // 初始化：加载示例对话或欢迎消息
 onMounted(() => {
@@ -135,17 +126,15 @@ const sendMessage = async () => {
   try {
     // 调用流式API
     await sendStreamingMessage(text, (chunk) => {
-      // 更新最后一条消息的内容
-      const lastMessage = messages.value[messages.value.length - 1]
-      if (lastMessage.role === 'assistant') {
-        lastMessage.content += chunk
+      const last = messages.value.at(-1)
+      if (last?.role === 'assistant') {
+        last.content += chunk
       }
     })
 
-    // 流式接收完成后，更新消息状态
-    const lastMessage = messages.value[messages.value.length - 1]
-    if (lastMessage.role === 'assistant') {
-      lastMessage.isStreaming = false
+    const last = messages.value.at(-1)
+    if (last?.role === 'assistant') {
+      last.isStreaming = false
     }
   } catch (error) {
     console.error('发送消息失败:', error)
@@ -213,26 +202,61 @@ const newSession = () => {
   height: 100vh;
   max-width: 1200px;
   margin: 0 auto;
-  background-color: #f5f5f5;
+  background-color: #f1f5f9;
 }
 
 .chat-header {
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  position: relative;
+  flex-shrink: 0;
+  padding: 1.25rem 1.5rem 1.35rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  color: #0f172a;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+}
+
+.chat-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1 0%, #7c3aed 50%, #a855f7 100%);
+}
+
+.chat-header-inner {
+  max-width: 42rem;
+  margin: 0 auto;
   text-align: center;
 }
 
-.chat-header h1 {
+.chat-title {
   margin: 0;
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: #0f172a;
 }
 
 .subtitle {
-  margin: 0.5rem 0 0;
-  opacity: 0.9;
-  font-size: 1rem;
+  margin: 0.4rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.brand-footer {
+  flex-shrink: 0;
+  padding: 0.65rem 1rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
 }
 
 .chat-main {
@@ -473,43 +497,18 @@ const newSession = () => {
   cursor: not-allowed;
 }
 
-.input-hint {
-  text-align: center;
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-kbd {
-  background-color: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
-  padding: 0.125rem 0.375rem;
-  font-family: monospace;
-  font-size: 0.875rem;
-}
-
-.chat-footer {
-  padding: 1rem;
-  background-color: #1f2937;
-  color: white;
-  text-align: center;
-}
-
-.footer-content p {
-  margin: 0.25rem 0;
-  font-size: 0.875rem;
-  opacity: 0.8;
-}
-
 /* 响应式设计 */
 @media (max-width: 768px) {
   .message-content {
     max-width: 85%;
   }
 
-  .chat-header h1 {
-    font-size: 1.5rem;
+  .chat-title {
+    font-size: 1.25rem;
+  }
+
+  .subtitle {
+    font-size: 0.8125rem;
   }
 }
 </style>
