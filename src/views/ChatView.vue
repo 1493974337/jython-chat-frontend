@@ -19,11 +19,6 @@
           <div class="message-content">
             <div class="message-role">{{ message.role === 'user' ? '你' : 'AI助手' }}</div>
             <div class="message-text" v-html="formatMessage(message.content)"></div>
-            <div v-if="message.role === 'assistant' && message.isStreaming" class="streaming-indicator">
-              <span class="typing-dots">
-                <span>.</span><span>.</span><span>.</span>
-              </span>
-            </div>
             <div class="message-time">{{ formatTime(message.timestamp) }}</div>
           </div>
         </div>
@@ -67,7 +62,6 @@ interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
-  isStreaming?: boolean
 }
 
 // 响应式数据
@@ -77,7 +71,7 @@ const loading = ref(false)
 const messagesContainer = ref<HTMLElement | null>(null)
 
 // 使用聊天API组合式函数
-const { sessionId, sendStreamingMessage, startNewSession } = useChatApi()
+const { sessionId, sendChatMessage, startNewSession } = useChatApi()
 
 // 初始化：加载示例对话或欢迎消息
 onMounted(() => {
@@ -111,35 +105,18 @@ const sendMessage = async () => {
   // 清空输入框
   inputMessage.value = ''
 
-  // 添加占位符的AI消息（用于流式响应）
-  const assistantMessage: ChatMessage = {
-    role: 'assistant',
-    content: '',
-    timestamp: new Date(),
-    isStreaming: true
-  }
-  messages.value.push(assistantMessage)
-
-  // 设置加载状态
   loading.value = true
 
   try {
-    // 调用流式API
-    await sendStreamingMessage(text, (chunk) => {
-      const last = messages.value.at(-1)
-      if (last?.role === 'assistant') {
-        last.content += chunk
-      }
+    // 非流式：POST /api/conversation/chat
+    const reply = await sendChatMessage(text)
+    messages.value.push({
+      role: 'assistant',
+      content: reply,
+      timestamp: new Date()
     })
-
-    const last = messages.value.at(-1)
-    if (last?.role === 'assistant') {
-      last.isStreaming = false
-    }
   } catch (error) {
     console.error('发送消息失败:', error)
-    // 移除占位符消息，添加错误消息
-    messages.value.pop()
     messages.value.push({
       role: 'assistant',
       content: `抱歉，消息发送失败：${error instanceof Error ? error.message : '未知错误'}`,
@@ -356,33 +333,6 @@ const newSession = () => {
 
 .user-message .message-time {
   text-align: right;
-}
-
-.streaming-indicator {
-  margin-top: 0.5rem;
-}
-
-.typing-dots {
-  display: inline-block;
-}
-
-.typing-dots span {
-  animation: blink 1.4s infinite;
-  opacity: 0;
-}
-
-.typing-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes blink {
-  0% { opacity: 0; }
-  50% { opacity: 1; }
-  100% { opacity: 0; }
 }
 
 .loading-indicator {
