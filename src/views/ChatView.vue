@@ -560,10 +560,109 @@ const newSession = () => {
 
 .message-text-md :deep(.code-block-wrap) {
   margin: 0.5rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+.assistant-message .message-text-md :deep(.code-block-wrap) {
+  background: #0f172a;
+  border-color: rgba(15, 23, 42, 0.2);
+}
+
+.user-message .message-text-md :deep(.code-block-wrap) {
+  background: rgba(15, 23, 42, 0.25);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .message-text-md .message-md-root > :deep(.code-block-wrap:first-child) {
   margin-top: 0;
+}
+
+.message-text-md :deep(.code-block-toolbar) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.7rem;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.user-message .message-text-md :deep(.code-block-toolbar) {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.message-text-md :deep(.code-lang) {
+  font-family: ui-monospace, monospace;
+  text-transform: lowercase;
+  opacity: 0.85;
+  color: #e2e8f0;
+}
+
+.message-text-md :deep(.code-lang-placeholder) {
+  opacity: 0.6;
+}
+
+/* v-html 内按钮无 scoped 属性，须 :deep；样式对齐底部「复制全文」按钮 */
+.message-text-md :deep(.code-copy-btn.md-code-copy-btn) {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  border: none;
+  border-radius: 0.35rem;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.85;
+  color: #e2e8f0;
+  transition: opacity 0.15s, background-color 0.15s;
+}
+
+.message-text-md :deep(.code-copy-btn.md-code-copy-btn:hover) {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.message-text-md :deep(.code-copy-btn .icon-copy-svg) {
+  width: 1.125rem;
+  height: 1.125rem;
+  display: block;
+}
+
+.message-text-md :deep(.code-pre) {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.message-text-md :deep(.code-inner) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #f1f5f9;
+}
+
+.message-text-md :deep(.md-code-copy-btn .md-check-icon-slot) {
+  display: none;
+}
+
+.message-text-md :deep(.md-code-copy-btn.is-copied .md-copy-icon-slot) {
+  display: none;
+}
+
+.message-text-md :deep(.md-code-copy-btn.is-copied .md-check-icon-slot) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message-text-md :deep(.code-copy-btn .md-check-svg) {
+  color: #86efac;
 }
 
 .assistant-message .message-text-md :deep(a) {
@@ -605,90 +704,6 @@ const newSession = () => {
 
 .user-message .message-text-md :deep(thead th) {
   background: rgba(0, 0, 0, 0.15);
-}
-
-.code-block-wrap {
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-}
-
-.assistant-message .code-block-wrap {
-  background: #0f172a;
-  border-color: rgba(15, 23, 42, 0.2);
-}
-
-.user-message .code-block-wrap {
-  background: rgba(15, 23, 42, 0.25);
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-.code-block-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.35rem 0.5rem;
-  font-size: 0.7rem;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.user-message .code-block-toolbar {
-  background: rgba(0, 0, 0, 0.15);
-}
-
-.code-lang {
-  font-family: ui-monospace, monospace;
-  text-transform: lowercase;
-  opacity: 0.85;
-  color: #e2e8f0;
-}
-
-.code-lang-placeholder {
-  opacity: 0.6;
-}
-
-.code-copy-btn {
-  opacity: 0.85;
-  color: #e2e8f0;
-}
-
-.code-copy-btn:hover {
-  background-color: rgba(255, 255, 255, 0.12) !important;
-}
-
-.md-code-copy-btn .md-check-icon-slot {
-  display: none;
-}
-
-.md-code-copy-btn.is-copied .md-copy-icon-slot {
-  display: none;
-}
-
-.md-code-copy-btn.is-copied .md-check-icon-slot {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.code-copy-btn .md-check-svg {
-  color: #86efac;
-}
-
-.code-pre {
-  margin: 0;
-  padding: 0.65rem 0.75rem;
-  overflow-x: auto;
-  max-width: 100%;
-}
-
-.code-inner {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.8125rem;
-  line-height: 1.45;
-  white-space: pre-wrap;
-  word-break: break-word;
-  color: #f1f5f9;
 }
 
 .message-time {
